@@ -12,431 +12,188 @@
   <link rel="apple-touch-icon" href="icon.svg">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0f172a;
-      --surface: #1e293b;
-      --surface2: #273549;
-      --border: #334155;
-      --accent: #6366f1;
-      --accent-glow: #6366f130;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --match-bg: #fbbf2440;
-      --match-border: #fbbf24;
-      --error: #f87171;
-      --success: #34d399;
-      --radius: 10px;
+      --bg: #0f172a; --surface: #1e293b; --surface2: #273549; --border: #334155;
+      --accent: #6366f1; --accent-glow: #6366f130; --text: #e2e8f0; --muted: #94a3b8;
+      --match-bg: #fbbf2440; --match-border: #fbbf24;
+      --error: #f87171; --success: #34d399; --warn: #fb923c; --radius: 10px;
     }
-
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
+    html, body { height: 100%; background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      font-size: 15px;
-      line-height: 1.5;
-    }
+      font-size: 15px; line-height: 1.5; }
+    body { display: flex; flex-direction: column; min-height: 100dvh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
 
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100dvh;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    }
+    header { background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 14px 18px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    #installHint { font-size: 11px; color: var(--muted); background: var(--surface2);
+      border: 1px solid var(--border); padding: 2px 7px; border-radius: 20px;
+      margin-left: auto; cursor: pointer; display: none; }
 
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .panel { padding: 16px; border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
 
-    header svg { flex-shrink: 0; }
+    label { font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--muted); display: block; margin-bottom: 5px; }
 
-    header h1 {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      color: var(--text);
-    }
+    .regex-row { display: flex; gap: 8px; align-items: stretch; }
+    .regex-wrap { flex: 1; }
+    .regex-wrap input { width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 12px; color: var(--text);
+      font-family: 'Menlo','Monaco','Consolas',monospace; font-size: 14px; outline: none; transition: border-color .15s; }
+    .regex-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .regex-wrap input.error { border-color: var(--error); }
 
-    header span {
-      font-size: 11px;
-      color: var(--muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 2px 7px;
-      border-radius: 20px;
-      margin-left: auto;
-    }
-
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .panel {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-
-    label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--muted);
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .regex-row {
-      display: flex;
-      gap: 8px;
-      align-items: stretch;
-    }
-
-    .regex-wrap {
-      flex: 1;
-      position: relative;
-    }
-
-    .regex-wrap input {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-      color: var(--text);
-      font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .regex-wrap input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .regex-wrap input.error {
-      border-color: var(--error);
-    }
-
-    .flags {
-      display: flex;
-      gap: 5px;
-    }
-
-    .flag-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      color: var(--muted);
-      font-family: monospace;
-      font-size: 13px;
-      font-weight: 700;
-      width: 36px;
-      cursor: pointer;
-      transition: all 0.15s;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .flag-btn.active {
-      background: var(--accent-glow);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
+    .flags { display: flex; gap: 5px; }
+    .flag-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
+      color: var(--muted); font-family: monospace; font-size: 13px; font-weight: 700;
+      width: 36px; height: 100%; cursor: pointer; transition: all .15s; padding: 0;
+      display: flex; align-items: center; justify-content: center; }
+    .flag-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
     .flag-btn:active { transform: scale(0.93); }
 
-    .tabs {
-      display: flex;
-      background: var(--surface2);
-      border-radius: var(--radius);
-      padding: 3px;
-      gap: 3px;
-    }
-
-    .tab {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 600;
-      padding: 7px;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .tab.active {
-      background: var(--surface);
-      color: var(--text);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    }
+    .tabs { display: flex; background: var(--surface2); border-radius: var(--radius); padding: 3px; gap: 3px; }
+    .tab { flex: 1; background: none; border: none; color: var(--muted); font-size: 12px;
+      font-weight: 600; padding: 7px 4px; border-radius: 7px; cursor: pointer; transition: all .15s; }
+    .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.3); }
 
     .source-panel { display: none; }
     .source-panel.active { display: flex; flex-direction: column; gap: 8px; }
 
-    .url-row {
-      display: flex;
-      gap: 8px;
-    }
+    .url-row { display: flex; gap: 8px; }
+    input[type="url"], textarea, select { background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 12px; color: var(--text);
+      font-size: 14px; outline: none; transition: border-color .15s; width: 100%; }
+    input[type="url"]:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    textarea { resize: none; height: 90px; font-family: 'Menlo','Monaco','Consolas',monospace; font-size: 12px; }
+    select { appearance: none; cursor: pointer; }
 
-    input[type="url"], textarea {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.15s;
-      width: 100%;
-    }
+    .dict-controls { display: flex; gap: 8px; align-items: stretch; }
+    .dict-controls select { flex: 1; }
 
-    input[type="url"]:focus, textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
+    .dict-status { font-size: 12px; padding: 8px 10px; border-radius: 7px;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .dict-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+    .dict-status .dot.ready { background: var(--success); }
+    .dict-status .dot.loading { background: var(--warn); animation: pulse 1s infinite; }
+    .dict-status .dot.err { background: var(--error); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-    textarea {
-      resize: none;
-      height: 90px;
-      font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
-      font-size: 12px;
-    }
+    .btn { background: var(--accent); color: #fff; border: none; border-radius: var(--radius);
+      padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+      white-space: nowrap; transition: opacity .15s, transform .1s;
+      display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn:active { transform: scale(0.96); opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: default; transform: none; }
+    .btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn.danger { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
+    .btn-full { width: 100%; }
+    .btn-sm { padding: 8px 12px; font-size: 12px; }
 
-    .btn {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: opacity 0.15s, transform 0.1s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:active { transform: scale(0.96); opacity: 0.85; }
-    .btn:disabled { opacity: 0.4; cursor: default; }
-    .btn.secondary {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .btn-full { width: 100%; justify-content: center; }
-
-    .options-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .toggle {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--muted);
-      cursor: pointer;
-      user-select: none;
-    }
-
+    .options-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none; }
     .toggle input { width: 14px; height: 14px; accent-color: var(--accent); }
 
-    .status-bar {
-      padding: 8px 16px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      font-size: 12px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-height: 34px;
-      flex-shrink: 0;
-    }
+    .status-bar { padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
+      font-size: 12px; color: var(--muted); display: flex; align-items: center;
+      gap: 8px; min-height: 34px; flex-shrink: 0; flex-wrap: wrap; }
+    .status-bar .badge { background: var(--accent); color: #fff; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+    .err-text { color: var(--error); }
+    .ok-text { color: var(--success); }
 
-    .status-bar .count {
-      background: var(--accent);
-      color: #fff;
-      font-weight: 700;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 20px;
-    }
-
-    .status-bar .err { color: var(--error); }
-    .status-bar .ok { color: var(--success); }
-
-    .loader {
-      width: 14px;
-      height: 14px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
+    .loader { width: 14px; height: 14px; border: 2px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .results {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      -webkit-overflow-scrolling: touch;
-    }
+    .results { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
+    .results-empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; gap: 10px; color: var(--muted); text-align: center; padding: 40px 20px; }
+    .results-empty svg { opacity: .3; }
 
-    .results-empty {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      gap: 10px;
-      color: var(--muted);
-      text-align: center;
-      padding: 40px 20px;
-    }
+    /* Text match cards */
+    .match-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
+    .match-card-head { display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; background: var(--surface2); font-size: 11px; color: var(--muted); font-weight: 600; }
+    .match-card-head .midx { background: var(--match-border); color: #000; font-weight: 700; padding: 1px 6px; border-radius: 4px; font-size: 10px; }
+    .match-card-body { padding: 10px 12px; font-family: 'Menlo','Monaco','Consolas',monospace;
+      font-size: 12px; line-height: 1.7; word-break: break-word; white-space: pre-wrap; }
+    mark { background: var(--match-bg); color: #fbbf24; border-bottom: 1px solid var(--match-border); border-radius: 2px; padding: 0 1px; }
+    .ctx { color: var(--muted); }
+    .groups { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 5px; }
+    .gchip { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; font-size: 11px; padding: 2px 7px; color: var(--muted); }
+    .gchip span { color: var(--accent); font-weight: 600; }
 
-    .results-empty svg { opacity: 0.3; }
+    /* Dictionary word grid */
+    .dict-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .dict-header h3 { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .copy-btn { font-size: 11px; padding: 3px 9px; border-radius: 5px; cursor: pointer;
+      background: var(--surface2); border: 1px solid var(--border); color: var(--muted); transition: all .15s; }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--success); color: var(--success); }
 
-    .match-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
+    .word-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .word-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+      padding: 4px 10px; font-size: 13px; font-family: 'Menlo','Monaco','Consolas',monospace;
+      color: var(--text); transition: border-color .1s; user-select: text; }
+    .word-chip:hover { border-color: var(--accent); }
 
-    .match-card-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      background: var(--surface2);
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .match-card-head .match-index {
-      background: var(--match-border);
-      color: #000;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-size: 10px;
-    }
-
-    .match-card-body {
-      padding: 10px 12px;
-      font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
-      font-size: 12px;
-      line-height: 1.7;
-      word-break: break-word;
-      white-space: pre-wrap;
-    }
-
-    mark {
-      background: var(--match-bg);
-      color: #fbbf24;
-      border-bottom: 1px solid var(--match-border);
-      border-radius: 2px;
-      padding: 0 1px;
-    }
-
-    .context-line { color: var(--muted); }
-
-    .groups {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-
-    .group-chip {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      font-size: 11px;
-      padding: 2px 7px;
-      color: var(--muted);
-    }
-
-    .group-chip span { color: var(--accent); font-weight: 600; }
+    .load-more-btn { width: 100%; margin-top: 12px; padding: 12px;
+      background: var(--surface); border: 1px dashed var(--border);
+      color: var(--muted); border-radius: var(--radius); cursor: pointer; font-size: 13px; transition: all .15s; }
+    .load-more-btn:hover { border-color: var(--accent); color: var(--text); }
 
     @media (max-width: 480px) {
       .panel { padding: 12px; gap: 10px; }
       .results { padding: 12px; }
+      .tab { font-size: 11px; padding: 7px 2px; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <rect width="24" height="24" rx="6" fill="#6366f1"/>
     <text x="4" y="17" font-family="monospace" font-size="13" font-weight="900" fill="white">.*</text>
   </svg>
   <h1>RegexSearch</h1>
-  <span id="installHint" style="display:none; cursor:pointer;" onclick="installPWA()">＋ Install</span>
+  <span id="installHint" onclick="installPWA()">＋ Install</span>
 </header>
 
 <div class="main">
   <div class="panel">
 
-    <!-- Regex Input -->
+    <!-- Pattern -->
     <div>
       <label>Pattern</label>
       <div class="regex-row">
         <div class="regex-wrap">
-          <input type="text" id="pattern" placeholder="e.g. \b\w+@\w+\.\w+\b" spellcheck="false" autocorrect="off" autocapitalize="off">
+          <input type="text" id="pattern" placeholder="e.g. ^un\w+ing$" spellcheck="false" autocorrect="off" autocapitalize="off">
         </div>
         <div class="flags">
           <button class="flag-btn active" data-flag="g" title="Global">g</button>
           <button class="flag-btn active" data-flag="i" title="Case insensitive">i</button>
           <button class="flag-btn" data-flag="m" title="Multiline">m</button>
-          <button class="flag-btn" data-flag="s" title="Dot matches newline">s</button>
+          <button class="flag-btn" data-flag="s" title="Dot all">s</button>
         </div>
       </div>
-      <div id="regexError" style="font-size:12px; color:var(--error); margin-top:5px; display:none;"></div>
+      <div id="regexError" style="font-size:12px;color:var(--error);margin-top:5px;display:none;"></div>
     </div>
 
-    <!-- Source tabs -->
+    <!-- Tabs -->
     <div>
       <label>Source</label>
       <div class="tabs">
         <button class="tab active" onclick="switchTab('url')">🌐 Fetch URL</button>
         <button class="tab" onclick="switchTab('paste')">📋 Paste Text</button>
+        <button class="tab" onclick="switchTab('dict')">📖 Dictionary</button>
       </div>
     </div>
 
-    <!-- URL Source -->
+    <!-- URL panel -->
     <div class="source-panel active" id="panel-url">
       <div class="url-row">
         <input type="url" id="urlInput" placeholder="https://example.com" autocorrect="off" autocapitalize="off">
@@ -451,9 +208,29 @@
       </div>
     </div>
 
-    <!-- Paste Source -->
+    <!-- Paste panel -->
     <div class="source-panel" id="panel-paste">
       <textarea id="pasteArea" placeholder="Paste text or HTML here…"></textarea>
+    </div>
+
+    <!-- Dictionary panel -->
+    <div class="source-panel" id="panel-dict">
+      <div class="dict-controls">
+        <select id="dictLocale" onchange="onLocaleChange()">
+          <option value="en-GB">🇬🇧 English (UK)</option>
+          <option value="en-US">🇺🇸 English (US)</option>
+        </select>
+        <button class="btn secondary btn-sm" id="dictLoadBtn" onclick="loadDictionary()">Load</button>
+        <button class="btn danger btn-sm" title="Clear cached dictionary" onclick="clearDictionary()">✕</button>
+      </div>
+      <div class="dict-status">
+        <span class="dot" id="dictDot"></span>
+        <span id="dictStatusText">Select a dictionary and press Load</span>
+      </div>
+      <div class="options-row">
+        <label class="toggle"><input type="checkbox" id="wholeWord" checked> Whole-word match</label>
+        <label class="toggle"><input type="checkbox" id="dictCI" checked> Case-insensitive</label>
+      </div>
     </div>
 
     <button class="btn btn-full" onclick="runSearch()">
@@ -463,7 +240,7 @@
   </div>
 
   <div class="status-bar" id="statusBar">
-    <span style="color:var(--muted)">Enter a pattern and load or paste content</span>
+    <span style="color:var(--muted)">Enter a pattern and choose a source</span>
   </div>
 
   <div class="results" id="results">
@@ -476,202 +253,360 @@
 </div>
 
 <script>
-  // ── Service Worker ──────────────────────────────────────────
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(console.warn);
-  }
+// ── Service Worker ─────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(console.warn);
+}
 
-  // ── PWA Install ─────────────────────────────────────────────
-  let deferredInstall = null;
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredInstall = e;
-    document.getElementById('installHint').style.display = 'flex';
+// ── PWA install prompt ─────────────────────────────────────────────────────
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredInstall = e;
+  document.getElementById('installHint').style.display = 'inline-block';
+});
+function installPWA() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(() => {
+    deferredInstall = null;
+    document.getElementById('installHint').style.display = 'none';
   });
+}
 
-  function installPWA() {
-    if (!deferredInstall) return;
-    deferredInstall.prompt();
-    deferredInstall.userChoice.then(() => {
-      deferredInstall = null;
-      document.getElementById('installHint').style.display = 'none';
-    });
-  }
-
-  // ── State ───────────────────────────────────────────────────
-  let currentText = '';
-  let activeTab = 'url';
-
-  // ── Tabs ────────────────────────────────────────────────────
-  function switchTab(tab) {
-    activeTab = tab;
-    document.querySelectorAll('.tab').forEach((t, i) => {
-      t.classList.toggle('active', (i === 0 && tab === 'url') || (i === 1 && tab === 'paste'));
-    });
-    document.querySelectorAll('.source-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + tab).classList.add('active');
-  }
-
-  // ── Flags ───────────────────────────────────────────────────
-  document.querySelectorAll('.flag-btn').forEach(btn => {
-    btn.addEventListener('click', () => btn.classList.toggle('active'));
+// ── IndexedDB (word list cache) ────────────────────────────────────────────
+const DB_NAME = 'regexsearch-v1', STORE = 'wordlists';
+function openDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+    r.onsuccess = e => res(e.target.result);
+    r.onerror   = e => rej(e.target.error);
   });
+}
+async function idbGet(key) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const r = db.transaction(STORE,'readonly').objectStore(STORE).get(key);
+    r.onsuccess = e => res(e.target.result); r.onerror = e => rej(e.target.error);
+  });
+}
+async function idbSet(key, val) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(val, key);
+    tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
+  });
+}
+async function idbDel(key) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).delete(key);
+    tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
+  });
+}
 
-  function getFlags() {
-    let f = '';
-    document.querySelectorAll('.flag-btn.active').forEach(b => f += b.dataset.flag);
-    // Ensure 'g' for matchAll
-    if (!f.includes('g')) f += 'g';
-    return f;
+// ── Dictionary sources ─────────────────────────────────────────────────────
+// Hunspell dictionaries from wooorm/dictionaries (open-licensed)
+// raw.githubusercontent.com returns Access-Control-Allow-Origin: * — no proxy needed
+const DICT_SOURCES = {
+  'en-GB': {
+    url:   'https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/en-GB/index.dic',
+    label: '🇬🇧 UK English'
+  },
+  'en-US': {
+    url:   'https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/en/index.dic',
+    label: '🇺🇸 US English'
   }
+};
 
-  // ── Fetch URL ───────────────────────────────────────────────
-  async function fetchUrl() {
-    const url = document.getElementById('urlInput').value.trim();
-    if (!url) { setStatus('Enter a URL first', 'err'); return; }
+let dictWords  = null;   // word array in memory
+let dictLocale = null;
+let dictAllMatches = []; // saved for pagination / copy
 
-    setStatus('<span class="loader"></span> Fetching…', '');
-    const useProxy = document.getElementById('useProxy').checked;
-    const fetchUrl = useProxy
-      ? `https://corsproxy.io/?${encodeURIComponent(url)}`
-      : url;
-
-    try {
-      const res = await fetch(fetchUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      let text = await res.text();
-      if (document.getElementById('stripHtml').checked) {
-        text = stripHtml(text);
-      }
-      currentText = text;
-      setStatus(`<span class="ok">✓ Loaded</span> ${currentText.length.toLocaleString()} chars from ${new URL(url).hostname}`, '');
-    } catch(e) {
-      setStatus(`<span class="err">✗ ${e.message}</span> — try enabling CORS proxy`, '');
-    }
+// Parse Hunspell .dic format: first line = word count, then word[/affix codes]
+function parseDic(raw) {
+  const lines = raw.split('\n');
+  lines.shift(); // remove count line
+  const seen = new Set();
+  for (const line of lines) {
+    const w = line.split('/')[0].trim().toLowerCase();
+    if (w && /^[a-z]+$/.test(w)) seen.add(w);
   }
+  return [...seen].sort();
+}
 
-  function stripHtml(html) {
-    // Remove scripts, styles, then tags
-    return html
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-  }
+function dictDotState(state, text) {
+  document.getElementById('dictDot').className = 'dot ' + state;
+  document.getElementById('dictStatusText').textContent = text;
+}
 
-  // ── Search ──────────────────────────────────────────────────
-  function runSearch() {
-    const patternInput = document.getElementById('pattern');
-    const patternStr = patternInput.value.trim();
-    if (!patternStr) { setStatus('Enter a regex pattern', 'err'); return; }
+async function loadDictionary() {
+  const locale = document.getElementById('dictLocale').value;
+  const src    = DICT_SOURCES[locale];
+  const btn    = document.getElementById('dictLoadBtn');
+  btn.disabled = true;
 
-    const text = activeTab === 'paste'
-      ? document.getElementById('pasteArea').value
-      : currentText;
-
-    if (!text) {
-      setStatus(activeTab === 'paste' ? 'Paste some text first' : 'Fetch a URL first', 'err');
+  dictDotState('loading', 'Checking device cache…');
+  try {
+    const cached = await idbGet(locale);
+    if (cached) {
+      dictWords  = cached;
+      dictLocale = locale;
+      dictDotState('ready', `${src.label} — ${cached.length.toLocaleString()} words  (offline-ready)`);
+      btn.disabled = false;
       return;
     }
+  } catch(e) {}
 
-    let regex;
-    try {
-      regex = new RegExp(patternStr, getFlags());
-      patternInput.classList.remove('error');
-      document.getElementById('regexError').style.display = 'none';
-    } catch(e) {
-      patternInput.classList.add('error');
-      const errEl = document.getElementById('regexError');
-      errEl.textContent = '⚠ ' + e.message;
-      errEl.style.display = 'block';
-      return;
+  dictDotState('loading', `Downloading ${src.label} dictionary…`);
+  try {
+    const res = await fetch(src.url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.text();
+    dictDotState('loading', 'Parsing…');
+    await new Promise(r => setTimeout(r, 0)); // yield so UI updates
+    const words = parseDic(raw);
+    dictDotState('loading', 'Saving to device…');
+    await idbSet(locale, words);
+    dictWords  = words;
+    dictLocale = locale;
+    dictDotState('ready', `${src.label} — ${words.length.toLocaleString()} words  (saved offline)`);
+  } catch(e) {
+    dictDotState('err', 'Download failed — check connection. ' + e.message);
+  }
+  btn.disabled = false;
+}
+
+async function clearDictionary() {
+  const locale = document.getElementById('dictLocale').value;
+  await idbDel(locale).catch(() => {});
+  if (dictLocale === locale) { dictWords = null; dictLocale = null; }
+  dictDotState('', 'Cache cleared — press Load to re-download');
+}
+
+async function onLocaleChange() {
+  const locale = document.getElementById('dictLocale').value;
+  const src    = DICT_SOURCES[locale];
+  dictDotState('loading', 'Checking cache…');
+  try {
+    const cached = await idbGet(locale);
+    if (cached) {
+      dictWords  = cached;
+      dictLocale = locale;
+      dictDotState('ready', `${src.label} — ${cached.length.toLocaleString()} words  (offline-ready)`);
+    } else {
+      dictWords  = null;
+      dictLocale = null;
+      dictDotState('', 'Not cached locally — press Load to download');
     }
+  } catch(e) { dictDotState('', 'Press Load to download'); }
+}
 
-    const matches = [...text.matchAll(regex)];
-    renderResults(text, regex, matches);
+// ── Shared state ───────────────────────────────────────────────────────────
+let currentText = '';
+let activeTab   = 'url';
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  const names = ['url','paste','dict'];
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === tab));
+  document.querySelectorAll('.source-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ── Flags ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.flag-btn').forEach(b => b.addEventListener('click', () => b.classList.toggle('active')));
+function getFlags() {
+  let f = '';
+  document.querySelectorAll('.flag-btn.active').forEach(b => f += b.dataset.flag);
+  return f.includes('g') ? f : f + 'g';
+}
+
+// ── URL fetch ──────────────────────────────────────────────────────────────
+async function fetchUrl() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { setStatus('Enter a URL first'); return; }
+  setStatus('<span class="loader"></span> Fetching…');
+  const proxy = document.getElementById('useProxy').checked;
+  const target = proxy ? `https://corsproxy.io/?${encodeURIComponent(url)}` : url;
+  try {
+    const res = await fetch(target);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    let text = await res.text();
+    if (document.getElementById('stripHtml').checked) text = stripHtml(text);
+    currentText = text;
+    setStatus(`<span class="ok-text">✓ Loaded</span> &nbsp;${text.length.toLocaleString()} chars from ${new URL(url).hostname}`);
+  } catch(e) {
+    setStatus(`<span class="err-text">✗ ${escHtml(e.message)}</span> — try enabling CORS proxy`);
+  }
+}
+
+function stripHtml(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi,'')
+    .replace(/<style[\s\S]*?<\/style>/gi,'')
+    .replace(/<[^>]+>/g,' ')
+    .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    .replace(/\s{2,}/g,' ').trim();
+}
+
+// ── Main search router ─────────────────────────────────────────────────────
+function runSearch() {
+  const inp = document.getElementById('pattern');
+  const pat = inp.value.trim();
+  if (!pat) { setStatus('Enter a regex pattern'); return; }
+
+  // Validate regex
+  try {
+    new RegExp(pat);
+    inp.classList.remove('error');
+    document.getElementById('regexError').style.display = 'none';
+  } catch(e) {
+    inp.classList.add('error');
+    const el = document.getElementById('regexError');
+    el.textContent = '⚠ ' + e.message; el.style.display = 'block';
+    return;
   }
 
-  // ── Render Results ──────────────────────────────────────────
-  function renderResults(text, regex, matches) {
-    const container = document.getElementById('results');
-    const statusBar = document.getElementById('statusBar');
+  if (activeTab === 'dict') {
+    searchDictionary(pat);
+  } else {
+    const text = activeTab === 'paste' ? document.getElementById('pasteArea').value : currentText;
+    if (!text) { setStatus(activeTab === 'paste' ? 'Paste some text first' : 'Fetch a URL first'); return; }
+    const regex = new RegExp(pat, getFlags());
+    renderTextResults(text, regex);
+  }
+}
 
-    if (matches.length === 0) {
-      statusBar.innerHTML = '<span class="err">No matches found</span>';
-      container.innerHTML = `<div class="results-empty">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-        <div>No matches found</div>
-        <div style="font-size:12px">Try adjusting the pattern or flags</div>
-      </div>`;
-      return;
+// ── Dictionary search ──────────────────────────────────────────────────────
+const PAGE = 300;
+
+function searchDictionary(pat) {
+  if (!dictWords) { setStatus('<span class="err-text">No dictionary loaded — press Load first</span>'); return; }
+
+  const ci        = document.getElementById('dictCI').checked;
+  const wholeWord = document.getElementById('wholeWord').checked;
+  const flags     = ci ? 'i' : '';
+
+  let testRe;
+  try {
+    // Whole-word mode: anchor the pattern so the entire word must match
+    testRe = wholeWord ? new RegExp('^(?:' + pat + ')$', flags) : new RegExp(pat, flags);
+  } catch(e) { setStatus('<span class="err-text">Invalid pattern: ' + escHtml(e.message) + '</span>'); return; }
+
+  const matches = dictWords.filter(w => testRe.test(w));
+  dictAllMatches = matches;
+  renderDictPage(matches, 0, true);
+}
+
+function renderDictPage(matches, offset, fresh) {
+  const container = document.getElementById('results');
+  const locale    = dictLocale || document.getElementById('dictLocale').value;
+  const label     = DICT_SOURCES[locale]?.label || locale;
+  const page      = matches.slice(offset, offset + PAGE);
+  const showing   = Math.min(offset + PAGE, matches.length);
+  const hasMore   = showing < matches.length;
+
+  if (matches.length === 0) {
+    setStatus('<span class="err-text">No words matched</span>');
+    container.innerHTML = `<div class="results-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      <div>No words matched in ${label}</div>
+      <div style="font-size:12px">Try disabling Whole-word mode or adjusting the pattern</div>
+    </div>`;
+    return;
+  }
+
+  setStatus(`<span class="badge">${matches.length.toLocaleString()}</span> words in ${label} &nbsp;· showing 1–${showing.toLocaleString()}`);
+
+  const chips = page.map(w => `<span class="word-chip">${escHtml(w)}</span>`).join('');
+  const moreBtn = hasMore
+    ? `<button class="load-more-btn" onclick="loadMoreDict(${showing})">Show ${Math.min(PAGE, matches.length-showing).toLocaleString()} more (${(matches.length-showing).toLocaleString()} remaining)</button>`
+    : '';
+
+  if (!fresh) {
+    // Append
+    document.querySelector('.word-grid').insertAdjacentHTML('beforeend', chips);
+    const old = document.querySelector('.load-more-btn');
+    if (old) old.remove();
+    if (moreBtn) document.getElementById('results').insertAdjacentHTML('beforeend', moreBtn);
+  } else {
+    container.innerHTML = `
+      <div class="dict-header">
+        <h3>${matches.length.toLocaleString()} matching words from ${label}</h3>
+        <button class="copy-btn" id="copyBtn" onclick="copyAllWords()">Copy all</button>
+      </div>
+      <div class="word-grid">${chips}</div>
+      ${moreBtn}`;
+  }
+}
+
+function loadMoreDict(offset) { renderDictPage(dictAllMatches, offset, false); }
+
+function copyAllWords() {
+  navigator.clipboard.writeText(dictAllMatches.join('\n')).then(() => {
+    const btn = document.getElementById('copyBtn');
+    if (!btn) return;
+    btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy all'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── Text / URL results ─────────────────────────────────────────────────────
+function renderTextResults(text, regex) {
+  const container = document.getElementById('results');
+  const matches   = [...text.matchAll(regex)];
+
+  if (matches.length === 0) {
+    setStatus('<span class="err-text">No matches found</span>');
+    container.innerHTML = `<div class="results-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      <div>No matches found</div>
+      <div style="font-size:12px">Try adjusting the pattern or flags</div>
+    </div>`;
+    return;
+  }
+
+  setStatus(`<span class="badge">${matches.length.toLocaleString()}</span> match${matches.length!==1?'es':''} in ${text.length.toLocaleString()} chars`);
+
+  const CTX = 80;
+  container.innerHTML = matches.map((m, idx) => {
+    const s = m.index, e = s + m[0].length;
+    const cs = Math.max(0, s-CTX), ce = Math.min(text.length, e+CTX);
+    const grps = m.length > 1
+      ? `<div class="groups">${Array.from(m).slice(1).map((g,i) =>
+          `<div class="gchip">Group ${i+1}: <span>${g!==undefined?escHtml(g):'<i>undefined</i>'}</span></div>`).join('')}</div>`
+      : '';
+    return `<div class="match-card">
+      <div class="match-card-head"><span class="midx">#${idx+1}</span><span>pos ${s}–${e}</span></div>
+      <div class="match-card-body"><span class="ctx">${cs>0?'…':''}${escHtml(text.slice(cs,s))}</span><mark>${escHtml(m[0])}</mark><span class="ctx">${escHtml(text.slice(e,ce))}${ce<text.length?'…':''}</span>${grps}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function setStatus(html) { document.getElementById('statusBar').innerHTML = html; }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Keyboard ───────────────────────────────────────────────────────────────
+document.getElementById('pattern').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
+document.getElementById('urlInput').addEventListener('keydown', e => { if(e.key==='Enter') fetchUrl(); });
+
+// ── On load: hydrate cached dict status ───────────────────────────────────
+(async () => {
+  const locale = document.getElementById('dictLocale').value;
+  try {
+    const cached = await idbGet(locale);
+    if (cached) {
+      dictWords  = cached;
+      dictLocale = locale;
+      dictDotState('ready', `${DICT_SOURCES[locale].label} — ${cached.length.toLocaleString()} words  (offline-ready)`);
     }
-
-    const count = matches.length;
-    statusBar.innerHTML = `<span class="count">${count}</span> match${count !== 1 ? 'es' : ''} in ${text.length.toLocaleString()} chars`;
-
-    const CONTEXT = 80;
-    let html = '';
-
-    matches.forEach((m, idx) => {
-      const start = m.index;
-      const end = start + m[0].length;
-      const ctxStart = Math.max(0, start - CONTEXT);
-      const ctxEnd = Math.min(text.length, end + CONTEXT);
-
-      const before = escHtml(text.slice(ctxStart, start));
-      const matched = escHtml(m[0]);
-      const after = escHtml(text.slice(end, ctxEnd));
-
-      const prefix = ctxStart > 0 ? '…' : '';
-      const suffix = ctxEnd < text.length ? '…' : '';
-
-      let groupsHtml = '';
-      if (m.length > 1) {
-        const chips = Array.from(m).slice(1).map((g, i) =>
-          `<div class="group-chip">Group ${i+1}: <span>${g !== undefined ? escHtml(g) : '<i>undefined</i>'}</span></div>`
-        ).join('');
-        groupsHtml = `<div class="groups">${chips}</div>`;
-      }
-
-      const posLabel = `pos ${start}–${end}`;
-
-      html += `
-        <div class="match-card">
-          <div class="match-card-head">
-            <span class="match-index">#${idx + 1}</span>
-            <span>${posLabel}</span>
-          </div>
-          <div class="match-card-body">
-            <span class="context-line">${prefix}${before}</span><mark>${matched}</mark><span class="context-line">${after}${suffix}</span>
-            ${groupsHtml}
-          </div>
-        </div>`;
-    });
-
-    container.innerHTML = html;
-  }
-
-  function escHtml(str) {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  // ── Status Bar ──────────────────────────────────────────────
-  function setStatus(html, type) {
-    document.getElementById('statusBar').innerHTML = html;
-  }
-
-  // ── Enter key triggers search ───────────────────────────────
-  document.getElementById('pattern').addEventListener('keydown', e => {
-    if (e.key === 'Enter') runSearch();
-  });
-  document.getElementById('urlInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') fetchUrl();
-  });
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>
