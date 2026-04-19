@@ -1,0 +1,19 @@
+{
+  "name": "RegexSearch",
+  "short_name": "RegexSearch",
+  "description": "Regex-powered word search — fetch a URL or paste text and search with full regex support",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"]
+}
