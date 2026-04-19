@@ -6,12 +6,19 @@ const ASSETS = [
   './icon.svg'
 ];
 
-// Install: cache all app assets
+// Install: cache assets individually — skip any that fail (e.g. in preview envs)
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
+    caches.open(CACHE).then(cache =>
+      Promise.allSettled(
+        ASSETS.map(url =>
+          fetch(url).then(res => {
+            if (res.ok) return cache.put(url, res);
+          }).catch(() => {}) // silently skip unavailable assets
+        )
+      )
+    ).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 // Activate: delete old caches
