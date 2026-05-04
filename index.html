@@ -38,21 +38,10 @@
     label { font-size: 11px; font-weight: 600; text-transform: uppercase;
       letter-spacing: 0.5px; color: var(--muted); display: block; margin-bottom: 5px; }
 
-    .regex-row { display: flex; gap: 8px; align-items: stretch; }
-    .regex-wrap { flex: 1; }
-    .regex-wrap input { width: 100%; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 10px 12px; color: var(--text);
-      font-family: 'Menlo','Monaco','Consolas',monospace; font-size: 14px; outline: none; transition: border-color .15s; }
-    .regex-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-    .regex-wrap input.error { border-color: var(--error); }
+    #pattern:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    #pattern.error { border-color: var(--error); }
 
-    .flags { display: flex; gap: 5px; }
-    .flag-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
-      color: var(--muted); font-family: monospace; font-size: 13px; font-weight: 700;
-      width: 36px; height: 100%; cursor: pointer; transition: all .15s; padding: 0;
-      display: flex; align-items: center; justify-content: center; }
-    .flag-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
-    .flag-btn:active { transform: scale(0.93); }
+
 
     select { background: var(--surface2); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 10px 12px; color: var(--text);
@@ -141,8 +130,6 @@
     @media (max-width: 480px) {
       .panel { padding: 12px; gap: 10px; }
       .results { padding: 12px; }
-      .regex-row { flex-wrap: wrap; }
-      .regex-wrap { width: 100%; }
     }
   </style>
 </head>
@@ -163,16 +150,7 @@
     <!-- Pattern -->
     <div>
       <label>Pattern</label>
-      <div class="regex-row">
-        <div class="regex-wrap">
-          <input type="text" id="pattern" placeholder="e.g. ^un\w+ing$" spellcheck="false" autocorrect="off" autocapitalize="off">
-        </div>
-        <div class="flags">
-          <button class="flag-btn" data-flag="i" title="Case insensitive">i</button>
-          <button class="flag-btn" data-flag="m" title="Multiline">m</button>
-          <button class="flag-btn" data-flag="s" title="Dot all">s</button>
-        </div>
-      </div>
+      <input type="text" id="pattern" placeholder="e.g. ^un\w+ing$" spellcheck="false" autocorrect="off" autocapitalize="off" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;color:var(--text);font-family:'Menlo','Monaco','Consolas',monospace;font-size:14px;outline:none;transition:border-color .15s">
       <div id="regexError" style="font-size:12px;color:var(--error);margin-top:5px;display:none;"></div>
     </div>
 
