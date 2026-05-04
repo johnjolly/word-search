@@ -161,6 +161,7 @@
         <select id="dictLocale" onchange="onLocaleChange()">
           <option value="en-GB">🇬🇧 English (UK)</option>
           <option value="en-US">🇺🇸 English (US)</option>
+          <option value="en-ext">📚 English Extended (~370k)</option>
         </select>
         <button class="btn secondary btn-sm" id="dictLoadBtn" onclick="loadDictionary()">Load</button>
         <button class="btn danger btn-sm" title="Clear cached dictionary" onclick="clearDictionary()">✕</button>
@@ -254,12 +255,19 @@ async function idbDel(key) {
 // ── Dictionary sources ─────────────────────────────────────────────────────
 const DICT_SOURCES = {
   'en-GB': {
-    url:   'https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/en-GB/index.dic',
-    label: '🇬🇧 UK English'
+    url:    'https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/en-GB/index.dic',
+    label:  '🇬🇧 English (UK)',
+    format: 'hunspell'
   },
   'en-US': {
-    url:   'https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/en/index.dic',
-    label: '🇺🇸 US English'
+    url:    'https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/en/index.dic',
+    label:  '🇺🇸 English (US)',
+    format: 'hunspell'
+  },
+  'en-ext': {
+    url:    'https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt',
+    label:  '📚 English Extended',
+    format: 'wordlist'
   }
 };
 
@@ -267,6 +275,7 @@ let dictWords  = null;
 let dictLocale = null;
 let dictAllMatches = [];
 
+// Hunspell .dic: first line is word count, then word[/affix] — base forms only
 function parseDic(raw) {
   const lines = raw.split('\n');
   lines.shift();
@@ -276,6 +285,20 @@ function parseDic(raw) {
     if (w && /^[a-z]+$/.test(w)) seen.add(w);
   }
   return [...seen].sort();
+}
+
+// Plain wordlist: one word per line (e.g. dwyl/english-words)
+function parseWordlist(raw) {
+  const seen = new Set();
+  for (const line of raw.split('\n')) {
+    const w = line.trim().toLowerCase();
+    if (w && /^[a-z]+$/.test(w)) seen.add(w);
+  }
+  return [...seen].sort();
+}
+
+function parseSource(raw, format) {
+  return format === 'hunspell' ? parseDic(raw) : parseWordlist(raw);
 }
 
 function dictDotState(state, text) {
@@ -308,7 +331,7 @@ async function loadDictionary() {
     const raw = await res.text();
     dictDotState('loading', 'Parsing…');
     await new Promise(r => setTimeout(r, 0));
-    const words = parseDic(raw);
+    const words = parseSource(raw, src.format);
     dictDotState('loading', 'Saving to device…');
     await idbSet(locale, words);
     dictWords  = words;
